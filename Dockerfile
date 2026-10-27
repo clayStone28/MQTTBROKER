@@ -29,7 +29,7 @@ RUN apk add --no-cache alsa-lib
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 # Locate jar dynamically across root or subfolder targets
-COPY --from=builder /app/**/target/*.jar mqttspringboot-*.jar
+COPY --from=builder /app/**/target/*.jar mqttspringboot-0.0.1-SNAPSHOT.jar
 
 RUN chown -R appuser:appgroup /app
 
@@ -37,4 +37,4 @@ USER appuser
 
 EXPOSE 8000
 
-ENTRYPOINT ["java", "-XX:+UseG1GC", "-XX:MaxRAMPercentage=75.0", "-jar", "mqttspringboot-*.jar"]
+ENTRYPOINT ["java", "-XX:+UseG1GC", "-XX:MaxRAMPercentage=75.0", "-jar", "mqttspringboot-0.0.1-SNAPSHOT.jar"]
