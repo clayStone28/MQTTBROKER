@@ -5,12 +5,10 @@ FROM maven:3.9-eclipse-temurin-17-alpine AS builder
 
 WORKDIR /app
 
-# 1. Leverage Docker layer caching for dependencies
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
+# 1. Copy full project context (pom.xml + src)
+COPY . .
 
-# 2. Copy source code and build final jar without running tests
-COPY src ./src
+# 2. Package the Spring Boot JAR (skipping unit tests)
 RUN mvn clean package -DskipTests
 
 # ==============================================================================
@@ -21,7 +19,7 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Install FreeTTS runtime audio support dependencies (ALSA sound library for Linux)
-RUN apk add --no-linux-pam alsa-lib
+RUN apk add --no-cache alsa-lib
 
 # Create a non-root user for security best practices
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
