@@ -14,6 +14,9 @@ COPY .. .
 
 RUN mvn clean package -DskipTests
 
+
+
+
 # ==============================================================================
 # Stage 2: Minimal Runtime Container
 # ==============================================================================
@@ -32,6 +35,6 @@ RUN chown -R appuser:appgroup /app
 
 USER appuser
 
-EXPOSE 8080
+EXPOSE 8000
 
 ENTRYPOINT ["java", "-XX:+UseG1GC", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
