@@ -5,10 +5,13 @@ FROM maven:3.9-eclipse-temurin-17-alpine AS builder
 
 WORKDIR /app
 
-# 1. Copy full project context (pom.xml + src)
-COPY . .
+# Copy everything from repository context
+COPY .. .
 
-# 2. Package the Spring Boot JAR (skipping unit tests)
+# Adjust WORKDIR to your subfolder if pom.xml is inside a subfolder (e.g., mqttspringboot)
+# Uncomment and update the line below if your pom.xml is inside a folder named 'mqttspringboot':
+# WORKDIR /app/mqttspringboot
+
 RUN mvn clean package -DskipTests
 
 # ==============================================================================
@@ -18,22 +21,17 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-# Install FreeTTS runtime audio support dependencies (ALSA sound library for Linux)
 RUN apk add --no-cache alsa-lib
 
-# Create a non-root user for security best practices
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# Copy the built JAR from the builder stage
-COPY --from=builder /app/target/*.jar app.jar
+# Locate jar dynamically across root or subfolder targets
+COPY --from=builder /app/**/target/*.jar app.jar
 
-# Ensure proper ownership of application files
 RUN chown -R appuser:appgroup /app
 
 USER appuser
 
-# Expose Spring Boot web port
-EXPOSE 8000
+EXPOSE 8080
 
-# Configure Java memory parameters for container environment
 ENTRYPOINT ["java", "-XX:+UseG1GC", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
